@@ -1,0 +1,5 @@
+# Language structure
+
+## Variables
+
+Variables
