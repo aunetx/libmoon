@@ -11,4 +11,5 @@ fn import() {
         Ok(_) => println!("Program parsed !"),
         Err(e) => panic!("Error : {:?}", e),
     }
+    dbg!(prog.lines);
 }
