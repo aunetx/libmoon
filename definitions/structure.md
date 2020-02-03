@@ -30,3 +30,5 @@ The possible types of operands are :
 - `(var|value)` -> either a `var` or a `value`, depending of the operand nature (if `var`, begins with `&`)
 - `type` -> a variable type : `int`, `flt`, `chr`
 - `flag` -> a flag name
+
+`pas`: pause the execution until restored?

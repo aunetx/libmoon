@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq)]
+pub mod implementations;
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum Instruction {
     /// Create an empty variable
     ///
@@ -120,7 +122,7 @@ type Var = String;
 type Flag = String;
 
 /// Gives either a hardcoded value or a variable-stored one
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Val {
     /// Links to a variable
     Var(Var),
@@ -129,7 +131,7 @@ pub enum Val {
 }
 
 /// Defines a type : `int`, `flt` or `chr`
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Type {
     /// Integer type
     Int,
