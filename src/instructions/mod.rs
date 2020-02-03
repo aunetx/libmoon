@@ -1,4 +1,5 @@
-pub mod implementations;
+use super::memory::Mem;
+use super::runtime::Error;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Instruction {
@@ -128,6 +129,14 @@ pub enum Val {
     Var(Var),
     /// Gives directly a value
     Value(String),
+}
+
+/// Returns the `i32` value of the given `String`
+pub fn get_int_value(val: String) -> Result<Option<i32>, Error> {
+    match val.trim().parse() {
+        Ok(l) => Ok(Some(l)),
+        Err(_) => Err(Error::CouldNotParseIntValue(val)),
+    }
 }
 
 /// Defines a type : `int`, `flt` or `chr`

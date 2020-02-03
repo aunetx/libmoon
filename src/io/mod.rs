@@ -5,6 +5,7 @@ use std::io::Read;
 
 /// A struct that contains the program, both under its text form and parsed form.
 #[derive(Default, Debug)]
+// TODO use only `&str` instead of `String` during parsing
 pub struct ProgramFile {
     text: String,
     pub lines: Vec<Instruction>,
