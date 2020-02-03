@@ -41,3 +41,21 @@ fn import() {
         }
     );
 }
+
+#[test]
+fn run() {
+    let mut prog_file = ProgramFile::new();
+    match prog_file.open("tests/test_programs/basic.moon") {
+        Ok(_) => println!("File opened !"),
+        Err(e) => panic!("Error : {:?}", e),
+    };
+    match prog_file.parse() {
+        Ok(_) => println!("Program parsed !"),
+        Err(e) => panic!("Error : {:?}", e),
+    }
+    let mut prog = Program::from(prog_file);
+    match prog.run() {
+        Ok(_) => println!("Program ran !"),
+        Err(e) => panic!("Error : runtime stopped with error {:?}", e),
+    };
+}

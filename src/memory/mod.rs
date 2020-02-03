@@ -1,6 +1,6 @@
-use super::Error;
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub enum Cll {
     Int(Option<i32>),
     Flt(Option<f64>),
