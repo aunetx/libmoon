@@ -27,6 +27,6 @@ The possible types of operands are :
 
 - `var` -> a variable name
 - `value` -> a hard-coded value of type : `int`, `flt` or `chr`
-- `(var|value)` -> either a `var` or a `value`, depending of the operand nature
+- `(var|value)` -> either a `var` or a `value`, depending of the operand nature (if `var`, begins with `&`)
 - `type` -> a variable type : `int`, `flt`, `chr`
 - `flag` -> a flag name

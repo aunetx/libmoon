@@ -1,13 +1,15 @@
 use super::instructions::*;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
 /// A struct that contains the program, both under its text form and parsed form.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct ProgramFile {
     text: String,
     pub lines: Vec<Instruction>,
     line_number: usize,
+    flags: HashMap<String, usize>,
 }
 
 impl ProgramFile {
@@ -17,6 +19,7 @@ impl ProgramFile {
             text: String::new(),
             lines: Vec::new(),
             line_number: 0,
+            flags: HashMap::new(),
         }
     }
 
@@ -36,20 +39,28 @@ impl ProgramFile {
         let program: Vec<&str> = self.text.lines().collect();
         for (line_number, line) in program.iter().enumerate() {
             self.line_number = line_number;
-            // TODO remove `dbg!`
-            self.lines.push(dbg!(self.parse_line(line)?));
+            match self.parse_line(line) {
+                Ok((ins, Some((flag_name, flag_id)))) => {
+                    self.lines.push(ins);
+                    self.flags.insert(flag_name, flag_id);
+                }
+                Ok((ins, None)) => {
+                    self.lines.push(ins);
+                }
+                Err(e) => return Err(e),
+            }
         }
         Ok(())
     }
 
-    fn parse_line(&self, line: &str) -> Result<Instruction, ErrorType> {
+    fn parse_line(&self, line: &str) -> Result<(Instruction, Option<(String, usize)>), ErrorType> {
         // Remove whitespaces
         let line: String = line.split_whitespace().collect();
         // Split instruction / operands
         let splitted: Vec<&str> = line.split(':').collect();
-        match splitted.len() {
-            0 => Ok(Instruction::Nll),
-            1 => Err(ErrorType::NotEnoughInstructionSeparator(self.line_number)),
+        match dbg!(&splitted).len() {
+            0 => Ok((Instruction::Nll, None)),
+            1 => Ok((Instruction::Nll, None)),
             2 => {
                 let instruction = splitted[0];
                 let operands: Vec<&str> = splitted[1].split(',').collect();
@@ -79,7 +90,7 @@ impl ProgramFile {
         &self,
         text_instruction: &str,
         operands: Vec<&str>,
-    ) -> Result<Instruction, ErrorType> {
+    ) -> Result<(Instruction, Option<(String, usize)>), ErrorType> {
         let op0 = operands[0].to_owned();
         match text_instruction {
             "var" | "set" | "add" | "sub" | "mul" | "div" | "rst" | "jmp" | "jne" => {
@@ -95,49 +106,79 @@ impl ProgramFile {
             _ => (),
         };
         match text_instruction {
-            "var" => Ok(Instruction::Var {
-                var: op0,
-                var_type: self.match_type(operands[1])?,
-            }),
-            "set" => Ok(Instruction::Set {
-                var: op0,
-                value: self.match_var_or_value(operands[1])?,
-            }),
-            "add" => Ok(Instruction::Add {
-                var: op0,
-                value: self.match_var_or_value(operands[1])?,
-            }),
-            "sub" => Ok(Instruction::Sub {
-                var: op0,
-                value: self.match_var_or_value(operands[1])?,
-            }),
-            "mul" => Ok(Instruction::Mul {
-                var: op0,
-                value: self.match_var_or_value(operands[1])?,
-            }),
-            "div" => Ok(Instruction::Div {
-                var: op0,
-                value: self.match_var_or_value(operands[1])?,
-            }),
-            "mod" => Ok(Instruction::Mod {
-                var: op0,
-                value: self.match_var_or_value(operands[1])?,
-            }),
-            "ret" => Ok(Instruction::Ret { var: op0 }),
-            "flg" => Ok(Instruction::Flg),
-            "gto" => Ok(Instruction::Gto { flag: op0 }),
-            "jmp" => Ok(Instruction::Jmp {
-                var: op0,
-                flag: operands[1].to_owned(),
-            }),
-            "jne" => Ok(Instruction::Jne {
-                var: op0,
-                flag: operands[1].to_owned(),
-            }),
-            "nll" => Ok(Instruction::Nll),
-            "prt" => Ok(Instruction::Prt {
-                value: self.match_var_or_value(&op0)?,
-            }),
+            "var" => Ok((
+                Instruction::Var {
+                    var: op0,
+                    var_type: self.match_type(operands[1])?,
+                },
+                None,
+            )),
+            "set" => Ok((
+                Instruction::Set {
+                    var: op0,
+                    value: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "add" => Ok((
+                Instruction::Add {
+                    var: op0,
+                    value: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "sub" => Ok((
+                Instruction::Sub {
+                    var: op0,
+                    value: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "mul" => Ok((
+                Instruction::Mul {
+                    var: op0,
+                    value: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "div" => Ok((
+                Instruction::Div {
+                    var: op0,
+                    value: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "mod" => Ok((
+                Instruction::Mod {
+                    var: op0,
+                    value: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "ret" => Ok((Instruction::Ret { var: op0 }, None)),
+            "flg" => Ok((Instruction::Flg, Some((op0, self.line_number)))),
+            "gto" => Ok((Instruction::Gto { flag: op0 }, None)),
+            "jmp" => Ok((
+                Instruction::Jmp {
+                    var: op0,
+                    flag: operands[1].to_owned(),
+                },
+                None,
+            )),
+            "jne" => Ok((
+                Instruction::Jne {
+                    var: op0,
+                    flag: operands[1].to_owned(),
+                },
+                None,
+            )),
+            "nll" => Ok((Instruction::Nll, None)),
+            "prt" => Ok((
+                Instruction::Prt {
+                    value: self.match_var_or_value(&op0)?,
+                },
+                None,
+            )),
             _ => Err(ErrorType::UnknownInstruction(
                 text_instruction.to_owned(),
                 self.line_number,
@@ -170,7 +211,6 @@ pub enum ErrorType {
     ErrorParsingLine(usize),
     NotEnoughOperands(usize),
     TooMuchOperands(usize),
-    NotEnoughInstructionSeparator(usize),
     TooMuchInstructionSeparator(usize),
     EmptyInstruction(usize),
     EmptyOperand(usize, usize),
