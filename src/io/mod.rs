@@ -59,7 +59,7 @@ impl ProgramFile {
         let line: String = line.split_whitespace().collect();
         // Split instruction / operands
         let splitted: Vec<&str> = line.split(':').collect();
-        match dbg!(&splitted).len() {
+        match &splitted.len() {
             0 => Ok((Instruction::Nll, None)),
             1 => Ok((Instruction::Nll, None)),
             2 => {
@@ -106,6 +106,7 @@ impl ProgramFile {
             }
             _ => (),
         };
+        // TODO remove leading `&` before variable names (or not, if used everywhere)
         match text_instruction {
             "var" => Ok((
                 Instruction::Var {

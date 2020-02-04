@@ -40,7 +40,8 @@ impl Program {
 
                 // ! ------- `SET` -------------
                 // `set` instruction
-                // TODO do NOT use `clone` on memory, find a way to do `self.memory.get(...)` while `self.memory.get_mut(...)`
+                // TODO do NOT use `clone` on memory, find a way to do `self.memory.get(...)` while memory borrowed by `self.memory.get_mut(...)`
+                // TODO write a macro to simplify matches (could be use for `set`, `add`, `sub`, `mul`, `div`, `mod`...)
                 Instruction::Set { var, value } => {
                     let old_mem = self.memory.clone();
                     match self.memory.get_mut(var) {
@@ -64,7 +65,7 @@ impl Program {
                                         }
                                         // If `val` is not defined
                                         None => {
-                                            return Err(Error::VariableIsUndefined(
+                                            return Err(Error::VariableIsUninitialized(
                                                 name.to_string(),
                                                 self.lnb,
                                             ))
@@ -90,7 +91,7 @@ impl Program {
                                         }
                                         // If `val` is not defined
                                         None => {
-                                            return Err(Error::VariableIsUndefined(
+                                            return Err(Error::VariableIsUninitialized(
                                                 name.to_string(),
                                                 self.lnb,
                                             ))
@@ -115,7 +116,7 @@ impl Program {
                                         }
                                         // If `val` is not defined
                                         None => {
-                                            return Err(Error::VariableIsUndefined(
+                                            return Err(Error::VariableIsUninitialized(
                                                 name.to_string(),
                                                 self.lnb,
                                             ))
@@ -128,6 +129,18 @@ impl Program {
                         None => return Err(Error::VariableDoesNotExists((*var).clone(), self.lnb)),
                     }
                 }
+
+                // ! ------- `PRT` -------------
+                // `prt` instruction
+                Instruction::Prt { value } => match value {
+                    Val::Value(val) => println!("l{} -> {} (value)", self.lnb, val),
+                    Val::Var(name) => match self.memory.get(name) {
+                        Some(val) => println!("l{} -> {}", self.lnb, val),
+                        None => {
+                            return Err(Error::VariableDoesNotExists(name.to_string(), self.lnb))
+                        }
+                    },
+                },
 
                 // ! ------- `ERR` -------------
                 // Instruction is not implemented yet
@@ -143,7 +156,7 @@ pub enum Error {
     UnimplementedInstruction(Instruction, usize),
     VariableDoesNotExists(String, usize),
     VariablesDifferInType(usize),
-    VariableIsUndefined(String, usize),
+    VariableIsUninitialized(String, usize),
     CouldNotParseIntValue(String),
     CouldNotParseFltValue(String),
     CouldNotParseChrValue(String),

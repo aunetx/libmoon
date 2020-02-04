@@ -1,4 +1,3 @@
-use super::memory::Mem;
 use super::runtime::Error;
 
 #[derive(Debug, PartialEq, Clone)]

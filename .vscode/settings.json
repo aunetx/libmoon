@@ -1,5 +1,6 @@
 {
     "code-runner.executorMap": {
-        "rust": "cargo build && cargo test # $fileNameWithoutExt"
+        "rust": "cargo build && cargo test # $fileNameWithoutExt",
+        "moonscript": "cargo build && cargo test # $fileNameWithoutExt",
     }
 }

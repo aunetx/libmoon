@@ -14,7 +14,7 @@ Instructions :
 - `sub: var, (var|value)`                SUBTRACT VALUE TO VARIABLE
 - `mul: var, (var|value)`                MULTIPLY VALUE TO VARIABLE
 - `div: var, (var|value)`                DIVIDE VALUE WITH VARIABLE
-- `rst: var, (var|value)`                DIVIDE VALUE WITH VARIABLE (gives the rest)
+- `mod: var, (var|value)`                DIVIDE VALUE WITH VARIABLE (gives the rest)
 - `ret: var`                             `set: var, _res` -> SET res VARIABLE INTO VAR
 - `gto: flag`                            GO TO INSTRUCTION
 - `jmp: var, flag`                       IF op1 IS 0 JUMP TO op2 FLAG
@@ -25,9 +25,9 @@ Instructions :
 
 The possible types of operands are :
 
-- `var` -> a variable name
+- `var` -> a variable name, preceded with `&` and containing only `a..z`, `A..Z`, `0..9`, `_` (e.g. `&my_var2`)
 - `value` -> a hard-coded value of type : `int`, `flt` or `chr`
-- `(var|value)` -> either a `var` or a `value`, depending of the operand nature (if `var`, begins with `&`)
+- `(var|value)` -> either a `var` or a `value`, depending of the operand nature (if `var`, begins with `&`) : type of value is inferred by first operand of the instruction
 - `type` -> a variable type : `int`, `flt`, `chr`
 - `flag` -> a flag name
 
