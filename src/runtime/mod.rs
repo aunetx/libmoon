@@ -19,6 +19,7 @@ impl Program {
     }
 
     /// Runs the program
+    #[allow(clippy::cognitive_complexity)]
     pub fn run(&mut self) -> Result<usize, Error> {
         for (line_number, line) in self.file.lines.iter().enumerate() {
             self.lnb = line_number;
@@ -41,7 +42,6 @@ impl Program {
                 // ! ------- `SET` -------------
                 // `set` instruction
                 // TODO do NOT use `clone` on memory, find a way to do `self.memory.get(...)` while memory borrowed by `self.memory.get_mut(...)`
-                // TODO write a macro to simplify matches (could be use for `set`, `add`, `sub`, `mul`, `div`, `mod`...)
                 Instruction::Set { var, value } => {
                     let old_mem = self.memory.clone();
                     match self.memory.get_mut(var) {
@@ -131,8 +131,32 @@ impl Program {
                 }
 
                 // ! ------- `ADD` -------------
+                // `add` instruction
                 Instruction::Add { var, value } => {
                     crate::get_and_change!(self, var, value, |a, b| { a + b });
+                }
+
+                // ! ------- `SUB` -------------
+                // `sub` instruction
+                Instruction::Sub { var, value } => {
+                    crate::get_and_change!(self, var, value, |a, b| { a - b });
+                }
+                // ! ------- `MUL` -------------
+                // `mul` instruction
+                Instruction::Mul { var, value } => {
+                    crate::get_and_change!(self, var, value, |a, b| { a * b });
+                }
+
+                // ! ------- `DIV` -------------
+                // `div` instruction
+                Instruction::Div { var, value } => {
+                    crate::get_and_change!(self, var, value, |a, b| { a / b });
+                }
+
+                // ! ------- `MOD` -------------
+                // `mod` instruction
+                Instruction::Mod { var, value } => {
+                    crate::get_and_change!(self, var, value, |a, b| { a % b });
                 }
 
                 // ! ------- `PRT` -------------
@@ -146,6 +170,10 @@ impl Program {
                         }
                     },
                 },
+
+                // ! ------- `NLL` -------------
+                // `nll` instruction
+                Instruction::Nll => (),
 
                 // ! ------- `ERR` -------------
                 // Instruction is not implemented yet

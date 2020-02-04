@@ -31,6 +31,7 @@ macro_rules! get_and_change {
         use crate::memory::*;
         use crate::runtime::Error;
 
+        // TODO do NOT use `clone` on memory, find a way to do `self.memory.get(...)` while memory borrowed by `self.memory.get_mut(...)`
         let old_mem = $prog.memory.clone();
         match $prog.memory.get_mut($var_op) {
             // ! If variable exists in memory
