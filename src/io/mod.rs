@@ -106,7 +106,6 @@ impl ProgramFile {
             }
             _ => (),
         };
-        // TODO remove leading `&` before variable names (or not, if used everywhere)
         match text_instruction {
             "var" => Ok((
                 Instruction::Var {
