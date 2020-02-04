@@ -51,7 +51,14 @@ impl Program {
                             Cll::Int(cll_val) => match value {
                                 // If `val` represents an hardcoded value
                                 Val::Value(str_val) => {
-                                    *cll_val = get_int_value((*str_val).clone())?;
+                                    *cll_val = match str_val.parse() {
+                                        Ok(l) => Some(l),
+                                        Err(_) => {
+                                            return Err(Error::CouldNotParseIntValue(
+                                                str_val.to_string(),
+                                            ))
+                                        }
+                                    };
                                 }
                                 // If `val` represents a memory-stored variable
                                 Val::Var(name) => {
@@ -77,7 +84,14 @@ impl Program {
                             Cll::Flt(cll_val) => match value {
                                 // If `val` represents an hardcoded value
                                 Val::Value(str_val) => {
-                                    *cll_val = get_flt_value((*str_val).clone())?;
+                                    *cll_val = match str_val.parse() {
+                                        Ok(l) => Some(l),
+                                        Err(_) => {
+                                            return Err(Error::CouldNotParseFltValue(
+                                                str_val.to_string(),
+                                            ))
+                                        }
+                                    };
                                 }
                                 // If `val` represents a memory-stored variable
                                 Val::Var(name) => {
@@ -102,7 +116,14 @@ impl Program {
                             Cll::Chr(cll_val) => match value {
                                 // If `val` represents an hardcoded value
                                 Val::Value(str_val) => {
-                                    *cll_val = get_chr_value((*str_val).clone())?;
+                                    *cll_val = match str_val.parse() {
+                                        Ok(l) => Some(l),
+                                        Err(_) => {
+                                            return Err(Error::CouldNotParseChrValue(
+                                                str_val.to_string(),
+                                            ))
+                                        }
+                                    };
                                 }
                                 // If `val` represents a memory-stored variable
                                 Val::Var(name) => {

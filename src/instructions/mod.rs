@@ -1,5 +1,3 @@
-use super::runtime::Error;
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Instruction {
     /// Create an empty variable
@@ -128,28 +126,6 @@ pub enum Val {
     Var(Var),
     /// Gives directly a value
     Value(String),
-}
-
-/// Returns the `i32` value of the given `String`
-pub fn get_int_value(val: String) -> Result<Option<i32>, Error> {
-    match val.trim().parse() {
-        Ok(l) => Ok(Some(l)),
-        Err(_) => Err(Error::CouldNotParseIntValue(val)),
-    }
-}
-/// Returns the `f64` value of the given `String`
-pub fn get_flt_value(val: String) -> Result<Option<f64>, Error> {
-    match val.trim().parse() {
-        Ok(l) => Ok(Some(l)),
-        Err(_) => Err(Error::CouldNotParseFltValue(val)),
-    }
-}
-/// Returns the `char` value of the given `String`
-pub fn get_chr_value(val: String) -> Result<Option<char>, Error> {
-    match val.trim().parse() {
-        Ok(l) => Ok(Some(l)),
-        Err(_) => Err(Error::CouldNotParseChrValue(val)),
-    }
 }
 
 /// Defines a type : `int`, `flt` or `chr`
