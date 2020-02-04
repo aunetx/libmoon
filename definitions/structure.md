@@ -15,12 +15,11 @@ Instructions :
 - `mul: var, (var|value)`                MULTIPLY VALUE TO VARIABLE
 - `div: var, (var|value)`                DIVIDE VALUE WITH VARIABLE
 - `mod: var, (var|value)`                DIVIDE VALUE WITH VARIABLE (gives the rest)
-- `ret: var`                             `set: var, _res` -> SET res VARIABLE INTO VAR -> is not needed, value is casted to op1
 - `gto: flag`                            GO TO INSTRUCTION
 - `jmp: var, flag`                       IF op1 IS 0 JUMP TO op2 FLAG
 - `jne: var, flag`                       IF op1 IS NOT 0 JUMP TO op2 FLAG
 - `flg: flag`                            CREATE FLAG
-- `nll: empty`                           DO NOTHING AND IS IGNORED BY INTERPRETER
+- `nll: nll`                           DO NOTHING AND IS IGNORED BY INTERPRETER
 - `prt: (var|value)`                     PRINT VALUE TO THE SCREEN
 
 The possible types of operands are :
@@ -30,5 +29,8 @@ The possible types of operands are :
 - `(var|value)` -> either a `var` or a `value`, depending of the operand nature (if `var`, begins with `&`) : type of value is inferred by first operand of the instruction
 - `type` -> a variable type : `int`, `flt`, `chr`
 - `flag` -> a flag name
+- `nll` -> a null operand, used only for `nll` instruction (should not be used)
+
+Comments can be written with plain-text, but without `:` (if this token is present, the current line will be parsed as an instruction)
 
 `pas`: pause the execution until restored?
