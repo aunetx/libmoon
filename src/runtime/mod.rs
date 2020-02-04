@@ -130,6 +130,11 @@ impl Program {
                     }
                 }
 
+                // ! ------- `ADD` -------------
+                Instruction::Add { var, value } => {
+                    crate::get_and_change!(self, var, value, |a, b| { a + b });
+                }
+
                 // ! ------- `PRT` -------------
                 // `prt` instruction
                 Instruction::Prt { value } => match value {
@@ -160,4 +165,5 @@ pub enum Error {
     CouldNotParseIntValue(String),
     CouldNotParseFltValue(String),
     CouldNotParseChrValue(String),
+    CannotApplyOperationsOnChar(usize),
 }

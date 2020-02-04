@@ -1,9 +1,7 @@
 var: &a, int
 var: &b, int
-set: &a, 4
-set: &b, &a
+set: &a, 15
 prt: &a
-prt: 8
 prt: &b
-var: &ld, flt
-prt: &ld
+add: &a, &b
+prt: &a
