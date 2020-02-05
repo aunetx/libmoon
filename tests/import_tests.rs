@@ -55,7 +55,7 @@ fn run() {
     }
     let mut prog = Program::from(prog_file);
     match prog.run() {
-        Ok(_) => println!("Program ran !"),
+        Ok(l) => println!("Program ran ! last line is n°{}", l),
         Err(e) => panic!("Error during runtime : {:?}", e),
     };
 }

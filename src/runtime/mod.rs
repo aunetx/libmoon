@@ -21,23 +21,27 @@ impl Program {
     /// Runs the program
     #[allow(clippy::cognitive_complexity)]
     pub fn run(&mut self) -> Result<usize, Error> {
-        for (line_number, line) in self.file.lines.iter().enumerate() {
-            self.lnb = line_number;
+        let mut line: &Instruction;
+        while self.lnb < self.file.lines.len() {
+            line = &self.file.lines[self.lnb];
             // Instruction matcher
-            match line {
+            self.lnb = match line {
                 // ! ------- `VAR` -------------
                 // `var` instruction
-                Instruction::Var { var, var_type } => match var_type {
-                    Type::Int => {
-                        self.memory.insert(var.clone(), Cll::Int(None));
-                    }
-                    Type::Flt => {
-                        self.memory.insert(var.clone(), Cll::Flt(None));
-                    }
-                    Type::Chr => {
-                        self.memory.insert(var.clone(), Cll::Chr(None));
-                    }
-                },
+                Instruction::Var { var, var_type } => {
+                    match var_type {
+                        Type::Int => {
+                            self.memory.insert(var.clone(), Cll::Int(None));
+                        }
+                        Type::Flt => {
+                            self.memory.insert(var.clone(), Cll::Flt(None));
+                        }
+                        Type::Chr => {
+                            self.memory.insert(var.clone(), Cll::Chr(None));
+                        }
+                    };
+                    self.lnb + 1
+                }
 
                 // ! ------- `SET` -------------
                 // `set` instruction
@@ -148,60 +152,72 @@ impl Program {
                         },
                         // If variable does not exists in memory
                         None => return Err(Error::VariableDoesNotExists((*var).clone(), self.lnb)),
-                    }
+                    };
+                    self.lnb + 1
                 }
 
                 // ! ------- `ADD` -------------
                 // `add` instruction
                 Instruction::Add { var, value } => {
                     crate::get_and_change!(self, var, value, |a, b| { a + b });
+                    self.lnb + 1
                 }
 
                 // ! ------- `SUB` -------------
                 // `sub` instruction
                 Instruction::Sub { var, value } => {
                     crate::get_and_change!(self, var, value, |a, b| { a - b });
+                    self.lnb + 1
                 }
                 // ! ------- `MUL` -------------
                 // `mul` instruction
                 Instruction::Mul { var, value } => {
                     crate::get_and_change!(self, var, value, |a, b| { a * b });
+                    self.lnb + 1
                 }
 
                 // ! ------- `DIV` -------------
                 // `div` instruction
                 Instruction::Div { var, value } => {
                     crate::get_and_change!(self, var, value, |a, b| { a / b });
+                    self.lnb + 1
                 }
 
                 // ! ------- `MOD` -------------
                 // `mod` instruction
                 Instruction::Mod { var, value } => {
                     crate::get_and_change!(self, var, value, |a, b| { a % b });
+                    self.lnb + 1
                 }
 
                 // ! ------- `PRT` -------------
                 // `prt` instruction
-                Instruction::Prt { value } => match value {
-                    Val::Value(val) => println!("l{} -> {} (value)", self.lnb, val),
-                    Val::Var(name) => match self.memory.get(name) {
-                        Some(val) => println!("l{} -> {}", self.lnb, val),
-                        None => {
-                            return Err(Error::VariableDoesNotExists(name.to_string(), self.lnb))
-                        }
-                    },
-                },
+                Instruction::Prt { value } => {
+                    match value {
+                        Val::Value(val) => println!("l{} -> {} (value)", self.lnb, val),
+                        Val::Var(name) => match self.memory.get(name) {
+                            Some(val) => println!("l{} -> {}", self.lnb, val),
+                            None => {
+                                return Err(Error::VariableDoesNotExists(
+                                    name.to_string(),
+                                    self.lnb,
+                                ))
+                            }
+                        },
+                    }
+                    self.lnb + 1
+                }
 
                 // ! ------- `NLL` -------------
                 // `nll` instruction
-                Instruction::Nll => (),
+                Instruction::Nll => self.lnb + 1,
 
                 // ! ------- `ERR` -------------
                 // Instruction is not implemented yet
                 e => return Err(Error::UnimplementedInstruction((*e).clone(), self.lnb)),
             }
         }
-        Ok(0)
+        Ok(self.lnb)
     }
 }
 
