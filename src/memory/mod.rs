@@ -152,3 +152,17 @@ macro_rules! get_and_change {
         }
     };
 }
+
+#[macro_export]
+macro_rules! compare_and_get_flag {
+    ($prog:expr, $val:expr, $flag:expr, $op:expr) => {
+        if $op($val) {
+            match $prog.file.flags.get($flag) {
+                Some(line) => *line,
+                None => return Err(Error::CouldNotFindFlag($flag.to_string(), $prog.lnb)),
+            }
+        } else {
+            $prog.lnb + 1
+        }
+    };
+}

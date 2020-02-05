@@ -1,15 +1,16 @@
-var: &a, int
-var: &b, int
+var: &i, int
 
-set: &a, 15
-add: &a, 10
-set: &b, &a
-sub: &a, 13
-div: &a, 4
-mul: &a, 3
-prt: &a
-prt: mod
-prt: &b
-prt: equals
-mod: &a, &b
-prt: &a
+Variable used to check if == 0
+var: &check, int
+
+set: &i, 0
+flg: a
+LOOP FROM HERE
+add: &i, 1
+prt: &i
+
+CHECK PART
+set: &check, 10
+sub: &check, &i
+jne: &check, a
+TO HERE

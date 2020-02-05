@@ -19,6 +19,8 @@ impl Program {
     }
 
     /// Runs the program
+    // TODO understand the clippy lint `block_in_if_condition_stmt` used for `compare_and_get_flag` macro
+    #[allow(clippy::block_in_if_condition_stmt)]
     #[allow(clippy::cognitive_complexity)]
     pub fn run(&mut self) -> Result<usize, Error> {
         let mut line: &Instruction;
@@ -208,6 +210,49 @@ impl Program {
                     self.lnb + 1
                 }
 
+                // ! ------- `GTO` -------------
+                // `gto` instruction
+                Instruction::Gto { flag } => match self.file.flags.get(flag) {
+                    Some(line) => *line,
+                    None => return Err(Error::CouldNotFindFlag(flag.to_string(), self.lnb)),
+                },
+
+                // ! ------- `JMP` -------------
+                // `jmp` instruction
+                Instruction::Jmp { var, flag } => match self.memory.get(var) {
+                    Some(cll) => match cll {
+                        Cll::Int(Some(val)) => {
+                            crate::compare_and_get_flag!(self, val, flag, |&a| { a == 0 })
+                        }
+                        Cll::Flt(Some(val)) => {
+                            crate::compare_and_get_flag!(self, val, flag, |&a| { a == 0. })
+                        }
+                        Cll::Chr(_) => return Err(Error::CannotApplyOperationsOnChar(self.lnb)),
+                        _ => return Err(Error::VariableIsUninitialized(var.to_string(), self.lnb)),
+                    },
+                    None => return Err(Error::VariableDoesNotExists(var.to_string(), self.lnb)),
+                },
+
+                // ! ------- `JNE` -------------
+                // `jne` instruction
+                Instruction::Jne { var, flag } => match self.memory.get(var) {
+                    Some(cll) => match cll {
+                        Cll::Int(Some(val)) => {
+                            crate::compare_and_get_flag!(self, val, flag, |&a| { a != 0 })
+                        }
+                        Cll::Flt(Some(val)) => {
+                            crate::compare_and_get_flag!(self, val, flag, |&a| { a != 0. })
+                        }
+                        Cll::Chr(_) => return Err(Error::CannotApplyOperationsOnChar(self.lnb)),
+                        _ => return Err(Error::VariableIsUninitialized(var.to_string(), self.lnb)),
+                    },
+                    None => return Err(Error::VariableDoesNotExists(var.to_string(), self.lnb)),
+                },
+
+                // ! ------- `FLG` -------------
+                // `flg` instruction
+                Instruction::Flg => self.lnb + 1,
+
                 // ! ------- `NLL` -------------
                 // `nll` instruction
                 Instruction::Nll => self.lnb + 1,
@@ -231,4 +276,5 @@ pub enum Error {
     CouldNotParseFltValue(String),
     CouldNotParseChrValue(String),
     CannotApplyOperationsOnChar(usize),
+    CouldNotFindFlag(String, usize),
 }

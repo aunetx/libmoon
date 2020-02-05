@@ -11,10 +11,10 @@ Basic :
 - [x] `mul`     -> multiply by value
 - [x] `div`     -> divide by value
 - [x] `mod`     -> modulo by value
-- [ ] `gto`     -> goto flag
-- [ ] `jmp`     -> if 0, jump to flag
-- [ ] `jne`     -> if != 0, jump to flag
-- [ ] `flg`     -> create flag
+- [x] `gto`     -> goto flag
+- [x] `jmp`     -> if 0, jump to flag
+- [x] `jne`     -> if != 0, jump to flag
+- [x] `flg`     -> create flag
 - [x] `nll`     -> do nothing
 - [x] `prt`     -> print variable
 

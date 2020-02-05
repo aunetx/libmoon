@@ -10,7 +10,7 @@ pub struct ProgramFile {
     text: String,
     pub lines: Vec<Instruction>,
     line_number: usize,
-    flags: HashMap<String, usize>,
+    pub flags: HashMap<String, usize>,
 }
 
 impl ProgramFile {
@@ -51,6 +51,8 @@ impl ProgramFile {
                 Err(e) => return Err(e),
             }
         }
+        // TODO remove `println`
+        println!("{:?}", self.flags);
         Ok(())
     }
 
@@ -195,7 +197,7 @@ impl ProgramFile {
 
     fn match_var_or_value(&self, input: &str) -> Result<Val, Error> {
         match input.get(0..1) {
-            Some("&") => Ok(Val::Var(input.to_owned())),
+            Some(crate::VARIABLE_IDENTIFIER) => Ok(Val::Var(input.to_owned())),
             Some(_) => Ok(Val::Value(input.to_owned())),
             None => Err(Error::EmptyValue(self.line_number)),
         }
