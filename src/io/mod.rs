@@ -77,10 +77,7 @@ impl ProgramFile {
                 } else if operands.len() > 1 && operands[1].is_empty() {
                     Err(Error::EmptyOperand(self.line_number, 2))
                 } else {
-                    match self.match_instruction(instruction, operands) {
-                        Ok(i) => Ok(i),
-                        Err(e) => Err(e),
-                    }
+                    self.match_instruction(instruction, operands)
                 }
             }
             _ => Err(Error::TooMuchInstructionSeparator(self.line_number)),
