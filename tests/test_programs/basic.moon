@@ -8,6 +8,7 @@ flg: a
 LOOP FROM HERE
 add: &i, 1
 prt: &i
+prt: hello
 
 CHECK PART
 set: &check, 10

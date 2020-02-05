@@ -196,9 +196,9 @@ impl Program {
                 // `prt` instruction
                 Instruction::Prt { value } => {
                     match value {
-                        Val::Value(val) => println!("l{} -> {} (value)", self.lnb, val),
+                        Val::Value(val) => println!("l°{:2} : value =   {}", self.lnb, val),
                         Val::Var(name) => match self.memory.get(name) {
-                            Some(val) => println!("l{} -> {}", self.lnb, val),
+                            Some(val) => println!("l°{:2} : {:5} =   {}", self.lnb, name, val),
                             None => {
                                 return Err(Error::VariableDoesNotExists(
                                     name.to_string(),

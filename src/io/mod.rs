@@ -51,8 +51,6 @@ impl ProgramFile {
                 Err(e) => return Err(e),
             }
         }
-        // TODO remove `println`
-        println!("{:?}", self.flags);
         Ok(())
     }
 
