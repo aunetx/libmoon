@@ -227,7 +227,7 @@ impl Program {
                         Cll::Flt(Some(val)) => {
                             crate::compare_and_get_flag!(self, val, flag, |&a| { a == 0. })
                         }
-                        Cll::Chr(_) => return Err(Error::CannotApplyOperationsOnChar(self.lnb)),
+                        Cll::Chr(_) => return Err(Error::CannotApplyComparisonsOnChar(self.lnb)),
                         _ => return Err(Error::VariableIsUninitialized(var.to_string(), self.lnb)),
                     },
                     None => return Err(Error::VariableDoesNotExists(var.to_string(), self.lnb)),
@@ -243,7 +243,7 @@ impl Program {
                         Cll::Flt(Some(val)) => {
                             crate::compare_and_get_flag!(self, val, flag, |&a| { a != 0. })
                         }
-                        Cll::Chr(_) => return Err(Error::CannotApplyOperationsOnChar(self.lnb)),
+                        Cll::Chr(_) => return Err(Error::CannotApplyComparisonsOnChar(self.lnb)),
                         _ => return Err(Error::VariableIsUninitialized(var.to_string(), self.lnb)),
                     },
                     None => return Err(Error::VariableDoesNotExists(var.to_string(), self.lnb)),
@@ -266,6 +266,7 @@ impl Program {
     }
 }
 
+/// Contains runtime type of errors
 #[derive(Debug)]
 pub enum Error {
     UnimplementedInstruction(Instruction, usize),
@@ -276,5 +277,6 @@ pub enum Error {
     CouldNotParseFltValue(String),
     CouldNotParseChrValue(String),
     CannotApplyOperationsOnChar(usize),
+    CannotApplyComparisonsOnChar(usize),
     CouldNotFindFlag(String, usize),
 }

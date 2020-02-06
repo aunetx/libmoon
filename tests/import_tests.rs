@@ -43,9 +43,27 @@ fn import() {
 }
 
 #[test]
-fn run() {
+fn basic_run() {
     let mut prog_file = ProgramFile::new();
     match prog_file.open("tests/test_programs/basic.moon") {
+        Ok(_) => println!("File opened !"),
+        Err(e) => panic!("Error during opening : {:?}", e),
+    };
+    match prog_file.parse() {
+        Ok(_) => println!("Program parsed !"),
+        Err(e) => panic!("Error during parsing : {:?}", e),
+    }
+    let mut prog = Program::from(prog_file);
+    match prog.run() {
+        Ok(l) => println!("Program finished successfuly at l°{}", l),
+        Err(e) => panic!("Error during runtime : {:?}", e),
+    };
+}
+
+#[test]
+fn tables() {
+    let mut prog_file = ProgramFile::new();
+    match prog_file.open("tests/test_programs/tables.moon") {
         Ok(_) => println!("File opened !"),
         Err(e) => panic!("Error during opening : {:?}", e),
     };

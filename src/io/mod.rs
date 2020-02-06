@@ -25,18 +25,18 @@ impl ProgramFile {
     }
 
     /// Reads a given program file.
-    pub fn open(&mut self, file_name: &'static str) -> Result<(), Error> {
+    pub fn open(&mut self, file_name: &'static str) -> Result<(), ErrorIO> {
         match File::open(file_name) {
             Ok(mut f) => {
                 f.read_to_string(&mut self.text).unwrap();
                 Ok(())
             }
-            Err(_) => Err(Error::CannotReadFile(file_name)),
+            Err(_) => Err(ErrorIO::CannotReadFile(file_name)),
         }
     }
 
     /// Parse the program.
-    pub fn parse(&mut self) -> Result<(), Error> {
+    pub fn parse(&mut self) -> Result<(), ErrorIO> {
         let program: Vec<&str> = self.text.lines().collect();
         for (line_number, line) in program.iter().enumerate() {
             self.line_number = line_number;
@@ -54,7 +54,7 @@ impl ProgramFile {
         Ok(())
     }
 
-    fn parse_line(&self, line: &str) -> Result<(Instruction, Option<(String, usize)>), Error> {
+    fn parse_line(&self, line: &str) -> Result<(Instruction, Option<(String, usize)>), ErrorIO> {
         // Remove whitespaces
         let line: String = line.split_whitespace().collect();
         // Split instruction / operands
@@ -67,20 +67,20 @@ impl ProgramFile {
                 let operands: Vec<&str> = splitted[1].split(',').collect();
 
                 if instruction.is_empty() {
-                    Err(Error::EmptyInstruction(self.line_number))
+                    Err(ErrorIO::EmptyInstruction(self.line_number))
                 } else if operands.is_empty() {
-                    Err(Error::NotEnoughOperands(self.line_number))
+                    Err(ErrorIO::NotEnoughOperands(self.line_number))
                 } else if operands.len() > 2 {
-                    Err(Error::TooMuchOperands(self.line_number))
+                    Err(ErrorIO::TooMuchOperands(self.line_number))
                 } else if operands[0].is_empty() {
-                    Err(Error::EmptyOperand(self.line_number, 1))
+                    Err(ErrorIO::EmptyOperand(self.line_number, 1))
                 } else if operands.len() > 1 && operands[1].is_empty() {
-                    Err(Error::EmptyOperand(self.line_number, 2))
+                    Err(ErrorIO::EmptyOperand(self.line_number, 2))
                 } else {
                     self.match_instruction(instruction, operands)
                 }
             }
-            _ => Err(Error::TooMuchInstructionSeparator(self.line_number)),
+            _ => Err(ErrorIO::TooMuchInstructionSeparator(self.line_number)),
         }
     }
 
@@ -88,17 +88,17 @@ impl ProgramFile {
         &self,
         text_instruction: &str,
         operands: Vec<&str>,
-    ) -> Result<(Instruction, Option<(String, usize)>), Error> {
+    ) -> Result<(Instruction, Option<(String, usize)>), ErrorIO> {
         let op0 = operands[0].to_owned();
         match text_instruction {
             "var" | "set" | "add" | "sub" | "mul" | "div" | "rst" | "jmp" | "jne" => {
                 if operands.len() < 2 {
-                    return Err(Error::NotEnoughOperands(self.line_number));
+                    return Err(ErrorIO::NotEnoughOperands(self.line_number));
                 }
             }
             "ret" | "gto" | "flg" | "prt" => {
                 if operands.len() > 1 {
-                    return Err(Error::TooMuchOperands(self.line_number));
+                    return Err(ErrorIO::TooMuchOperands(self.line_number));
                 }
             }
             _ => (),
@@ -177,34 +177,34 @@ impl ProgramFile {
                 },
                 None,
             )),
-            _ => Err(Error::UnknownInstruction(
+            _ => Err(ErrorIO::UnknownInstruction(
                 text_instruction.to_owned(),
                 self.line_number,
             )),
         }
     }
 
-    fn match_type(&self, input: &str) -> Result<Type, Error> {
+    fn match_type(&self, input: &str) -> Result<Type, ErrorIO> {
         match input {
             "int" => Ok(Type::Int),
             "flt" => Ok(Type::Flt),
             "chr" => Ok(Type::Chr),
-            e => Err(Error::UnknownType(e.to_owned(), self.line_number)),
+            e => Err(ErrorIO::UnknownType(e.to_owned(), self.line_number)),
         }
     }
 
-    fn match_var_or_value(&self, input: &str) -> Result<Val, Error> {
+    fn match_var_or_value(&self, input: &str) -> Result<Val, ErrorIO> {
         match input.get(0..1) {
             Some(crate::VARIABLE_IDENTIFIER) => Ok(Val::Var(input.to_owned())),
             Some(_) => Ok(Val::Value(input.to_owned())),
-            None => Err(Error::EmptyValue(self.line_number)),
+            None => Err(ErrorIO::EmptyValue(self.line_number)),
         }
     }
 }
 
 /// Contains types of IO errors
 #[derive(Debug)]
-pub enum Error {
+pub enum ErrorIO {
     CannotReadFile(&'static str),
     ErrorParsingLine(usize),
     NotEnoughOperands(usize),
