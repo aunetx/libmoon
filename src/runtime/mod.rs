@@ -21,7 +21,10 @@ impl Program {
     /// Runs the program
     // TODO understand the clippy lint `block_in_if_condition_stmt` used for `compare_and_get_flag` macro
     #[allow(clippy::block_in_if_condition_stmt)]
+    // TODO get around lint 'cannot borrow self.memory as mutable because it is also borrowed as immutable'
+    #[allow(mutable_borrow_reservation_conflict)]
     #[allow(clippy::cognitive_complexity)]
+    #[allow(unreachable_patterns)]
     pub fn run(&mut self) -> Result<usize, Error> {
         let mut line: &Instruction;
         while self.lnb < self.file.lines.len() {
@@ -192,6 +195,41 @@ impl Program {
                     self.lnb + 1
                 }
 
+                // ! ------- `CADD` -------------
+                // `cadd` instruction
+                Instruction::Cadd { op1, op2 } => {
+                    crate::get_and_set_carry!(self, op1, op2, |a, b| { a + b });
+                    self.lnb + 1
+                }
+
+                // ! ------- `CSUB` -------------
+                // `csub` instruction
+                Instruction::Csub { op1, op2 } => {
+                    crate::get_and_set_carry!(self, op1, op2, |a, b| { a - b });
+                    self.lnb + 1
+                }
+
+                // ! ------- `CMUL` -------------
+                // `cmul` instruction
+                Instruction::Cmul { op1, op2 } => {
+                    crate::get_and_set_carry!(self, op1, op2, |a, b| { a * b });
+                    self.lnb + 1
+                }
+
+                // ! ------- `CDIV` -------------
+                // `cdiv` instruction
+                Instruction::Cdiv { op1, op2 } => {
+                    crate::get_and_set_carry!(self, op1, op2, |a, b| { a / b });
+                    self.lnb + 1
+                }
+
+                // ! ------- `CMOD` -------------
+                // `cmod` instruction
+                Instruction::Cmod { op1, op2 } => {
+                    crate::get_and_set_carry!(self, op1, op2, |a, b| { a % b });
+                    self.lnb + 1
+                }
+
                 // ! ------- `PRT` -------------
                 // `prt` instruction
                 Instruction::Prt { value } => {
@@ -279,4 +317,5 @@ pub enum Error {
     CannotApplyOperationsOnChar(usize),
     CannotApplyComparisonsOnChar(usize),
     CouldNotFindFlag(String, usize),
+    CannotDetermineReturnType(usize),
 }

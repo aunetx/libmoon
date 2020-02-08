@@ -96,7 +96,7 @@ impl ProgramFile {
                     return Err(ErrorIO::NotEnoughOperands(self.line_number));
                 }
             }
-            "ret" | "gto" | "flg" | "prt" => {
+            "gto" | "flg" | "prt" => {
                 if operands.len() > 1 {
                     return Err(ErrorIO::TooMuchOperands(self.line_number));
                 }
@@ -153,7 +153,6 @@ impl ProgramFile {
                 },
                 None,
             )),
-            "ret" => Ok((Instruction::Ret { var: op0 }, None)),
             "flg" => Ok((Instruction::Flg, Some((op0, self.line_number)))),
             "gto" => Ok((Instruction::Gto { flag: op0 }, None)),
             "jmp" => Ok((
@@ -177,6 +176,42 @@ impl ProgramFile {
                 },
                 None,
             )),
+
+            "cadd" => Ok((
+                Instruction::Cadd {
+                    op1: self.match_var_or_value(operands[0])?,
+                    op2: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "csub" => Ok((
+                Instruction::Csub {
+                    op1: self.match_var_or_value(operands[0])?,
+                    op2: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "cmul" => Ok((
+                Instruction::Cmul {
+                    op1: self.match_var_or_value(operands[0])?,
+                    op2: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "cdiv" => Ok((
+                Instruction::Cdiv {
+                    op1: self.match_var_or_value(operands[0])?,
+                    op2: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
+            "cmod" => Ok((
+                Instruction::Cmod {
+                    op1: self.match_var_or_value(operands[0])?,
+                    op2: self.match_var_or_value(operands[1])?,
+                },
+                None,
+            )),
             _ => Err(ErrorIO::UnknownInstruction(
                 text_instruction.to_owned(),
                 self.line_number,
@@ -196,6 +231,7 @@ impl ProgramFile {
     fn match_var_or_value(&self, input: &str) -> Result<Val, ErrorIO> {
         match input.get(0..1) {
             Some(crate::VARIABLE_IDENTIFIER) => Ok(Val::Var(input.to_owned())),
+            Some(crate::CARRY_VARIABLE) => Ok(Val::Var(input.to_owned())),
             Some(_) => Ok(Val::Value(input.to_owned())),
             None => Err(ErrorIO::EmptyValue(self.line_number)),
         }

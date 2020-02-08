@@ -23,14 +23,12 @@ impl fmt::Display for Cll {
 
 pub type Mem = HashMap<String, Cll>;
 
+/// Performs the given operation on two variables, and set the result into the first one
+/// We do not merge it with the very similar `get_and_set_carry` macro because we want to open only one time `op1`
 // e.g. : get_and_change!(self, var, value, |a, b| { a + b }); to add var and value
 #[macro_export]
 macro_rules! get_and_change {
     ($prog:expr, $var_op:expr, $val_op:expr, $op:expr) => {
-        use crate::instructions::*;
-        use crate::memory::*;
-        use crate::runtime::Error;
-
         // TODO do NOT use `clone` on memory, find a way to do `self.memory.get(...)` while memory borrowed by `self.memory.get_mut(...)`
         let old_mem = $prog.memory.clone();
         match $prog.memory.get_mut($var_op) {
@@ -98,7 +96,7 @@ macro_rules! get_and_change {
                             // If `val` is successfully parsed, add `cll_val`'s value and `val`
                             Ok(l) => l,
                             // If `val` is not successfully parsed
-                            Err(_) => return Err(Error::CouldNotParseIntValue((*str_val).clone())),
+                            Err(_) => return Err(Error::CouldNotParseFltValue((*str_val).clone())),
                         };
                         let a: f64 = match cll_val {
                             Some(a) => *a,
@@ -149,6 +147,164 @@ macro_rules! get_and_change {
             },
             // ! If variable does not exists in memory
             None => return Err(Error::VariableDoesNotExists((*$var_op).clone(), $prog.lnb)),
+        }
+    };
+}
+
+/// Similar to `get_and_change`, but set result into `carry` variable : `-`
+#[macro_export]
+macro_rules! get_and_set_carry {
+    ($prog:expr, $op1:expr, $op2:expr, $op:expr) => {
+        // Match `op1` as a variable or a value
+        match $op1 {
+            // op1 is a variable
+            Val::Var(var_1) => match $prog.memory.get(var_1) {
+                // op1 exists in memory
+                Some(var_1_cll) => match var_1_cll {
+                    // op1 is uninitialized : error
+                    Cll::Int(None) | Cll::Flt(None) => {
+                        return Err(Error::VariableIsUninitialized(var_1.to_string(), $prog.lnb))
+                    }
+                    // op1 is an `int`
+                    Cll::Int(Some(var_1_value)) => match $op2 {
+                        // op2 is a variable
+                        Val::Var(var_2) => match $prog.memory.get(var_2) {
+                            // op2 exists in memory
+                            Some(var_2_cll) => match var_2_cll {
+                                // op2 is uninitialized : error
+                                Cll::Int(None) => {
+                                    return Err(Error::VariableIsUninitialized(
+                                        var_2.to_string(),
+                                        $prog.lnb,
+                                    ))
+                                }
+                                // op2 is an `int` too
+                                Cll::Int(Some(var_2_value)) => {
+                                    $prog.memory.insert(
+                                        "-".to_owned(),
+                                        Cll::Int(Some($op(var_1_value, var_2_value))),
+                                    );
+                                }
+                                // op2 is not an `int` : error
+                                _ => return Err(Error::VariablesDifferInType($prog.lnb)),
+                            },
+                            // op2 does not exists in memory : error
+                            None => {
+                                return Err(Error::VariableDoesNotExists(
+                                    var_1.to_string(),
+                                    $prog.lnb,
+                                ))
+                            }
+                        },
+                        // op2 is a value
+                        Val::Value(val_2) => match val_2.parse::<i32>() {
+                            // if op2 could be parsed as `int`
+                            Ok(val_2_value) => {
+                                $prog.memory.insert(
+                                    "-".to_owned(),
+                                    Cll::Int(Some($op(var_1_value, val_2_value))),
+                                );
+                            }
+                            // if op2 could not be parsed : error
+                            Err(_) => return Err(Error::CannotDetermineReturnType($prog.lnb)),
+                        },
+                    },
+                    // op1 is a `flt`
+                    Cll::Flt(Some(var_1_value)) => match $op2 {
+                        // op2 is a variable
+                        Val::Var(var_2) => match $prog.memory.get(var_2) {
+                            // op2 exists in memory
+                            Some(var_2_cll) => match var_2_cll {
+                                // op2 is uninitialized : error
+                                Cll::Flt(None) => {
+                                    return Err(Error::VariableIsUninitialized(
+                                        var_2.to_string(),
+                                        $prog.lnb,
+                                    ))
+                                }
+                                // op2 is a `flt` too
+                                Cll::Flt(Some(var_2_value)) => {
+                                    $prog.memory.insert(
+                                        "-".to_owned(),
+                                        Cll::Flt(Some($op(var_1_value, var_2_value))),
+                                    );
+                                }
+                                // op2 is not a `flt` : error
+                                _ => return Err(Error::VariablesDifferInType($prog.lnb)),
+                            },
+                            // op2 does not exists in memory : error
+                            None => {
+                                return Err(Error::VariableDoesNotExists(
+                                    var_1.to_string(),
+                                    $prog.lnb,
+                                ))
+                            }
+                        },
+                        // op2 is a value
+                        Val::Value(val_2) => match val_2.parse::<f64>() {
+                            // if op2 could be parsed as `flt`
+                            Ok(val_2_value) => {
+                                $prog.memory.insert(
+                                    "-".to_owned(),
+                                    Cll::Flt(Some($op(var_1_value, val_2_value))),
+                                );
+                            }
+                            // if op2 could not be parsed : error
+                            Err(_) => return Err(Error::CannotDetermineReturnType($prog.lnb)),
+                        },
+                    },
+                    // op1 is a `chr` : error
+                    Cll::Chr(_) => return Err(Error::CannotApplyOperationsOnChar($prog.lnb)),
+                },
+                // op1 does not exist in memory : error
+                None => return Err(Error::VariableDoesNotExists(var_1.to_string(), $prog.lnb)),
+            },
+            // op1 is a value
+            Val::Value(val_1) => match $op2 {
+                // op2 is a value : error
+                Val::Value(_) => return Err(Error::CannotDetermineReturnType($prog.lnb)),
+                // op2 is a variable
+                Val::Var(val_2) => match $prog.memory.get(val_2) {
+                    // op2 exists in memory
+                    Some(val_2_cll) => match val_2_cll {
+                        // op2 is uninitialized
+                        Cll::Int(None) | Cll::Flt(None) => {
+                            return Err(Error::VariableIsUninitialized(
+                                val_2.to_string(),
+                                $prog.lnb,
+                            ))
+                        }
+                        // op2 is an `int`
+                        Cll::Int(Some(val_2_value)) => match val_1.parse::<i32>() {
+                            // if op1 could be parsed as `int`
+                            Ok(val_1_value) => {
+                                $prog.memory.insert(
+                                    "-".to_owned(),
+                                    Cll::Int(Some($op(val_1_value, val_2_value))),
+                                );
+                            }
+                            // if op1 could not be parsed : error
+                            Err(_) => return Err(Error::CannotDetermineReturnType($prog.lnb)),
+                        },
+                        // op2 is a `flt`
+                        Cll::Flt(Some(val_2_value)) => match val_1.parse::<f64>() {
+                            // if op1 could be parsed as `flt`
+                            Ok(val_1_value) => {
+                                $prog.memory.insert(
+                                    "-".to_owned(),
+                                    Cll::Flt(Some($op(val_1_value, val_2_value))),
+                                );
+                            }
+                            // if op1 could not be parsed : error
+                            Err(_) => return Err(Error::CannotDetermineReturnType($prog.lnb)),
+                        },
+                        // op2 is a `chr` : error
+                        Cll::Chr(_) => return Err(Error::CannotApplyOperationsOnChar($prog.lnb)),
+                    },
+                    // op2 does not exist in memory : error
+                    _ => unimplemented!(),
+                },
+            },
         }
     };
 }

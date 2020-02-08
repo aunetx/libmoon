@@ -56,14 +56,6 @@ pub enum Instruction {
     /// mod: hello, 3
     /// ```
     Mod { var: Var, value: Val },
-    /// Set variable to last result
-    ///
-    /// Utilisation :
-    ///
-    /// ```Moon
-    /// res: hello
-    /// ```
-    Ret { var: Var },
     /// Create a flag to jump to
     ///
     /// Utilisation :
@@ -112,6 +104,53 @@ pub enum Instruction {
     /// prt: hello
     /// ```
     Prt { value: Val },
+
+    // carry operations :
+    /// Add value to variable and store the result into `-`
+    /// Carry alternative to `add`
+    ///
+    /// Utilisation :
+    ///
+    /// ```Moon
+    /// cadd: hello, 5
+    /// ```
+    Cadd { op1: Val, op2: Val },
+    /// Substract value from variable and store the result into `-`
+    /// Carry alternative to `sub`
+    ///
+    /// Utilisation :
+    ///
+    /// ```Moon
+    /// csub: hello, 5
+    /// ```
+    Csub { op1: Val, op2: Val },
+    /// Multiply value with variable and store the result into `-`
+    /// Carry alternative to `mul`
+    ///
+    /// Utilisation :
+    ///
+    /// ```Moon
+    /// cmul: hello, 2
+    /// ```
+    Cmul { op1: Val, op2: Val },
+    /// Divides variable by value and store the result into `-`
+    /// Carry alternative to `div`
+    ///
+    /// Utilisation :
+    ///
+    /// ```Moon
+    /// cdiv: hello, 3
+    /// ```
+    Cdiv { op1: Val, op2: Val },
+    /// Gives the rest of the division of variable by value and store the result into `-`
+    /// Carry alternative to `mod`
+    ///
+    /// Utilisation :
+    ///
+    /// ```Moon
+    /// cmod: hello, 3
+    /// ```
+    Cmod { op1: Val, op2: Val },
 }
 
 /// Represents a variable
