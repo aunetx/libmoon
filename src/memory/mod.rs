@@ -225,7 +225,7 @@ macro_rules! get_and_set_carry {
                                 // op2 is a `flt` too
                                 Cll::Flt(Some(var_2_value)) => {
                                     $prog.memory.insert(
-                                        "-".to_owned(),
+                                        crate::CARRY_VARIABLE.to_owned(),
                                         Cll::Flt(Some($op(var_1_value, var_2_value))),
                                     );
                                 }
@@ -245,7 +245,7 @@ macro_rules! get_and_set_carry {
                             // if op2 could be parsed as `flt`
                             Ok(val_2_value) => {
                                 $prog.memory.insert(
-                                    "-".to_owned(),
+                                    crate::CARRY_VARIABLE.to_owned(),
                                     Cll::Flt(Some($op(var_1_value, val_2_value))),
                                 );
                             }
@@ -279,7 +279,7 @@ macro_rules! get_and_set_carry {
                             // if op1 could be parsed as `int`
                             Ok(val_1_value) => {
                                 $prog.memory.insert(
-                                    "-".to_owned(),
+                                    crate::CARRY_VARIABLE.to_owned(),
                                     Cll::Int(Some($op(val_1_value, val_2_value))),
                                 );
                             }
@@ -291,7 +291,7 @@ macro_rules! get_and_set_carry {
                             // if op1 could be parsed as `flt`
                             Ok(val_1_value) => {
                                 $prog.memory.insert(
-                                    "-".to_owned(),
+                                    crate::CARRY_VARIABLE.to_owned(),
                                     Cll::Flt(Some($op(val_1_value, val_2_value))),
                                 );
                             }
@@ -302,7 +302,7 @@ macro_rules! get_and_set_carry {
                         Cll::Chr(_) => return Err(Error::CannotApplyOperationsOnChar($prog.lnb)),
                     },
                     // op2 does not exist in memory : error
-                    _ => unimplemented!(),
+                    _ => return Err(Error::VariableDoesNotExists(val_2.to_string(), $prog.lnb)),
                 },
             },
         }
