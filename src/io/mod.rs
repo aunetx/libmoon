@@ -91,7 +91,8 @@ impl ProgramFile {
     ) -> Result<(Instruction, Option<(String, usize)>), ErrorIO> {
         let op0 = operands[0].to_owned();
         match text_instruction {
-            "var" | "set" | "add" | "sub" | "mul" | "div" | "rst" | "jmp" | "jne" => {
+            "var" | "set" | "add" | "sub" | "mul" | "div" | "mod" | "cadd" | "csub" | "cmul"
+            | "cdiv" | "cmod" | "jmp" | "jne" => {
                 if operands.len() < 2 {
                     return Err(ErrorIO::NotEnoughOperands(self.line_number));
                 }
