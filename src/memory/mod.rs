@@ -269,10 +269,7 @@ macro_rules! get_and_set_carry {
                     Some(val_2_cll) => match val_2_cll {
                         // op2 is uninitialized
                         Cll::Int(None) | Cll::Flt(None) => {
-                            return Err(Error::VariableIsUninitialized(
-                                val_2.to_string(),
-                                $prog.lnb,
-                            ))
+                            return Err(Error::VariableIsUninitialized(val_2.to_string(), $prog.lnb))
                         }
                         // op2 is an `int`
                         Cll::Int(Some(val_2_value)) => match val_1.parse::<i32>() {
